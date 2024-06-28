@@ -1,0 +1,38 @@
+import serial
+import time
+from screen_brightness_control import set_brightness
+from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+from ctypes import cast, POINTER
+from comtypes import CLSCTX_ALL
+
+# Seri portu başlat
+ser = serial.Serial('COM5', 9600)  # 'COM5' yerine Arduino'nuzun bağlı olduğu portu yazın
+time.sleep(2)  # Bağlantının kurulması için bekle
+
+# Ses kontrolü için Pycaw ayarları
+devices = AudioUtilities.GetSpeakers()
+interface = devices.Activate(
+    IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+volume = cast(interface, POINTER(IAudioEndpointVolume))
+
+while True:
+    try:
+        line = ser.readline().decode('utf-8').strip()
+        if line.startswith("Volume:"):
+            parts = line.split(" ")
+            volume_value = int(parts[0].split(":")[1])
+            brightness_value = int(parts[1].split(":")[1])
+
+            # Ses seviyesini ayarla
+            volume.SetMasterVolumeLevelScalar(volume_value / 255.0, None)
+
+            # Ekran parlaklığını ayarla
+            set_brightness(brightness_value)
+
+    except KeyboardInterrupt:
+        print("Çıkılıyor...")
+        break
+    except Exception as e:
+        print(f"Hata: {e}")
+
+ser.close()
