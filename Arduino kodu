@@ -1,0 +1,22 @@
+const int volPin = A0;
+const int brtPin = A1;
+
+void setup() {
+ Serial.begin(9600);
+}
+
+void loop() {
+ int volVal = analogRead(volPin);
+ int brtVal = analogRead(brtPin);
+
+ int volume = map(volVal, 0, 1023, 0, 255);
+ int brightness = map(brtVal, 0, 1023, 0, 255);
+
+ Serial.print("Volume: "); Serial.print(volume);
+ Serial.print(" ");
+ Serial.print("Brightness: "); Serial.println(brightness);
+
+ delay(100);
+ 
+}
+ 
